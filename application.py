@@ -1,11 +1,13 @@
 import os
 
-from flask import Flask, session, render_template, request
+from flask import Flask, session, render_template, request, jsonify, abort
 from flask_session import Session
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 
 from helpers import login_required 
+
+from werkzeug.security import check_password_hash, generate_password_hash
 
 app = Flask(__name__)
 
@@ -41,16 +43,30 @@ def register():
         password = str(request.form.get('password'))
         confirmacion = str(request.form.get('password_confirmation'))
 
-        print(has_spaces(username))
-
         if password != confirmacion:
             return 'Passwords must be equal'
 
-        username2 = username.strip()
-        password2 = password.strip()
-        confirmacion2 = confirmacion.strip()
+        username = username.strip()
+        password  = password.strip()
+        confirmacion = confirmacion.strip()
 
-        print(username2,password2,confirmacion2)
+        if username == '' or password == '' or confirmacion == '':
+            return 'Not valid credentials'
+
+        # Validando que solo pueda existir un usuario
+
+        res = db.execute("SELECT * FROM usuarios WHERE username = :username",
+                        {"username": username}).fetchone()
+
+        if res:
+            return "User already taken"
+        
+        db.execute("INSERT INTO usuarios (username, hash) VALUES (:username, :hash)",
+                  {"username": username, "hash": generate_password_hash(password)})
+                  
+        db.commit()
+
+
         return 'OK'
     else:
         return render_template("register.html")
@@ -63,9 +79,15 @@ def login():
     else:
         return render_template("login.html")
 
-def has_spaces(string):
-    for i in string:
-        if i == ' ':
-            return True
+@app.route("/api/<isbn>")
+def api(isbn):
+    libro = db.execute("SELECT * FROM books WHERE isbn = :numero",
+                        {"numero": isbn}).fetchone()
+    if not libro:
+        abort(404)
         
-    return False
+    return jsonify({"isbn": libro[0], "title": libro[1], "author": libro[2], "year": libro[3]})
+
+@app.errorhandler(404)
+def not_found(e):
+    return render_template('404.html'), 404
