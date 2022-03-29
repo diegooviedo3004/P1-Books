@@ -1,0 +1,31 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Register
+{% endblock %}
+
+{% block main %}
+<style>
+    form {
+        width: 50%;
+        margin-top: 10vh;
+        transform: translate(50%);
+    }
+
+</style>
+<form action="/register" method="post">
+    <div class="form-group mb-3">
+      <label for="username" class="form-label">Usuario</label>
+      <input type="text" class="form-control" name="username" required>
+    </div>
+    <div class="form-group mb-3">
+      <label for="password" class="form-label">Contraseña</label>
+      <input type="password" class="form-control" name="password" required>
+    </div>
+    <div class=" form-group mb-3">
+      <label for="password_confirmation" class="form-label">Repita su contraseña</label>
+      <input type="password" class="form-control" name="password_confirmation" required>
+    </div>
+    <button type="submit" class="btn btn-primary mt-1">Registrarse</button>
+  </form>
+{% endblock %}
