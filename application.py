@@ -1,3 +1,4 @@
+import json
 import os
 
 from flask import Flask, session, render_template, request, jsonify, abort, redirect
@@ -116,3 +117,13 @@ def logout():
 @app.errorhandler(404)
 def not_found(e):
     return render_template('404.html'), 404
+
+@app.route("/<value>")
+@login_required
+def busqueda(value):
+    rows = db.execute("SELECT * FROM books WHERE isbn LIKE :value OR title LIKE :value OR author LIKE :value OR year LIKE :value", {
+        "value": value + "%"}).fetchall()
+    elementos = []
+    for i in rows:
+        elementos.append(list(i))
+    return jsonify(elementos)
