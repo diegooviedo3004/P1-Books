@@ -1,0 +1,4 @@
+ec2-54-157-79-121.compute-1.amazonaws.com
+d1imfg7f6knr49
+nnobexbojluqje
+65098c7989898e4d99ab8b9ae8a7d2b662b7a9f0060ec82df352a42d501fab8e

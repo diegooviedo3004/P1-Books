@@ -1,6 +1,6 @@
 import os
 
-from flask import Flask, session, render_template, request, jsonify, abort
+from flask import Flask, session, render_template, request, jsonify, abort, redirect
 from flask_session import Session
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
@@ -34,7 +34,7 @@ def after_request(response):
 @app.route("/")
 @login_required
 def index():
-    return "a"
+    return render_template("index.html")
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
@@ -73,8 +73,27 @@ def register():
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
+    session.clear()
+
     if request.method == 'POST':
-        pass
+        username = str(request.form.get('username'))
+        password = str(request.form.get('password'))
+
+        username = username.strip()
+        password = password.strip()
+
+        if username == "" or password == "":
+            return redirect("/login")
+
+        rows = db.execute("SELECT * FROM usuarios WHERE username = :nombre",
+                        {"nombre": username}).fetchone()
+
+        if len(rows) != 3 or not check_password_hash(rows[2],password):
+            return redirect("/login")
+
+        session["user_id"] = rows[0]
+
+        return redirect('/')
 
     else:
         return render_template("login.html")
@@ -88,6 +107,12 @@ def api(isbn):
         
     return jsonify({"isbn": libro[0], "title": libro[1], "author": libro[2], "year": libro[3]})
 
+@app.route("/logout",methods=["GET", "POST"])
+@login_required
+def logout():
+    session.clear()
+    return redirect("/")
+    
 @app.errorhandler(404)
 def not_found(e):
     return render_template('404.html'), 404
