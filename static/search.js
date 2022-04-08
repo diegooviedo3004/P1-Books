@@ -10,11 +10,21 @@ async function request() {
     for(element of data){
         $('#books_container').append(`<div class="col m-2 p-2"><div class="book">${element[0]}<br>${element[1]}<br>${element[2]}<br>${element[3]}</div></div>`)
     }
+    console.log(document.getElementsByClassName('book').length);
 }
-input_books.addEventListener('keyup',() => {
+
+function debounce(callback, wait) {
+    let timerId;
+    return (...args) => {
+    clearTimeout(timerId);
+    timerId = setTimeout(() => {
+        callback(...args);
+    }, wait);
+    };
+}
+
+input_books.addEventListener('keyup', debounce(() => {
     if(!(input_books.value == "")){
         request()  
     }
-})
-
-
+}, 1000))

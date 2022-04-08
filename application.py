@@ -121,9 +121,17 @@ def not_found(e):
 @app.route("/<value>")
 @login_required
 def busqueda(value):
-    rows = db.execute("SELECT * FROM books WHERE isbn LIKE :value OR title LIKE :value OR author LIKE :value OR year LIKE :value", {
-        "value": value + "%"}).fetchall()
+    value = value.lower()
+    rows = db.execute("SELECT * FROM books WHERE lower(isbn) LIKE :value OR lower(title) LIKE :value OR lower(author) LIKE :value OR lower(year) LIKE :value", {
+        "value": "%" + value + "%"}).fetchall()
     elementos = []
     for i in rows:
         elementos.append(list(i))
     return jsonify(elementos)
+
+
+
+# https://www.namecheap.com/hosting/shared/
+# https://dash.cloudflare.com/sign-up?pt=f
+# Validacion intentos de password
+# https://www.hostinger.es/
